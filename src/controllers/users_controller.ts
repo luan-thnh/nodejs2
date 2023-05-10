@@ -4,7 +4,7 @@ import UserModel from '../models/users_model';
 class UserController {
   async index(req: Request, res: Response) {
     try {
-      const users = await UserModel.find({});
+      const users = await UserModel.findAll();
       res.status(200).json({ users });
     } catch (error) {
       res.status(500).json({ message: 'Err!!' });
@@ -15,7 +15,7 @@ class UserController {
     const id = req.params.id;
 
     try {
-      const users = await UserModel.findById(id);
+      const users = await UserModel.findByPk(id);
       res.status(200).json({ users });
     } catch (error) {
       res.status(500).json({ message: 'Err!!' });
@@ -24,6 +24,7 @@ class UserController {
 
   async create(req: Request, res: Response) {
     try {
+      console.log(req.body);
       let userNew = await UserModel.create({
         name: req.body.name,
         email: req.body.email,
@@ -33,20 +34,23 @@ class UserController {
       res.status(500).json({ message: 'Err!!' });
     }
   }
+
   async update(req: Request, res: Response) {
     const id = req.params.id;
     const { name, email } = req.body;
 
     try {
-      const user = await UserModel.findByIdAndUpdate(
-        id,
+      const [numOfAffectedRows, affectedRows] = await UserModel.update(
         { name, email },
-        { new: true }
+        { where: { id }, returning: true }
       );
-      if (!user) {
+
+      if (numOfAffectedRows !== 1) {
         return res.status(404).json({ message: 'User not found' });
       }
-      res.status(200).json({ user });
+
+      const updatedUser = affectedRows[0];
+      res.status(200).json({ updatedUser });
     } catch (error) {
       res.status(500).json({ message: 'Error' });
     }
@@ -56,10 +60,12 @@ class UserController {
     const id = req.params.id;
 
     try {
-      const user = await UserModel.findByIdAndDelete(id);
-      if (!user) {
+      const numOfAffectedRows = await UserModel.destroy({ where: { id } });
+
+      if (numOfAffectedRows !== 1) {
         return res.status(404).json({ message: 'User not found' });
       }
+
       res.status(200).json({ message: 'User deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Error' });

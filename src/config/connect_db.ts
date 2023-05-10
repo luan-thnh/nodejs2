@@ -1,8 +1,13 @@
-import mongoose from 'mongoose';
+import { Sequelize } from 'sequelize';
 
-export const connect = () => {
-  mongoose
-    .connect('mongodb://localhost:27017/api')
-    .then(() => console.log('Connected!'))
-    .catch(() => console.log('Not connected!!'));
-};
+const sequelize = new Sequelize('demo', 'root', '1000', {
+  host: 'localhost',
+  dialect: 'mysql',
+  pool: {
+    max: 5,
+    min: 0,
+    idle: 10000,
+  },
+});
+
+export default sequelize;

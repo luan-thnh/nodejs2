@@ -6,7 +6,18 @@ import bodyParser from 'body-parser';
 // import logger from 'morgan';
 
 import indexRouter from './routes/index';
-import { connect } from './config/connect_db';
+import userRouter from './routes/user';
+import sequelize from './config/connect_db';
+
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log('Successfully connected to the database.');
+    // ... start your server here
+  })
+  .catch((error) => {
+    console.error('Unable to connect to the database:', error);
+  });
 
 // take a port 3000 for running server.
 const port: number = 3000;
@@ -14,7 +25,6 @@ const port: number = 3000;
 const app = express();
 
 // connect mongodb
-connect();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -27,7 +37,8 @@ app.use(cookieParser());
 app.use(bodyParser.json({ type: 'application/*+json' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/users', indexRouter);
+app.use('/', indexRouter);
+app.use('/users', userRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
