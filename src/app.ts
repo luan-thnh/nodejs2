@@ -7,17 +7,6 @@ import bodyParser from 'body-parser';
 
 import indexRouter from './routes/index';
 import userRouter from './routes/user';
-import sequelize from './config/connect_db';
-
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log('Successfully connected to the database.');
-    // ... start your server here
-  })
-  .catch((error) => {
-    console.error('Unable to connect to the database:', error);
-  });
 
 // take a port 3000 for running server.
 const port: number = 3000;

@@ -4,8 +4,10 @@ import UserModel from '../models/users_model';
 class UserController {
   async index(req: Request, res: Response) {
     try {
-      const users = await UserModel.findAll();
-      res.status(200).json({ users });
+      const user = await UserModel.findAll();
+      res
+        .status(200)
+        .json({ status: 'Successful!', results: user.length, user });
     } catch (error) {
       res.status(500).json({ message: 'Err!!' });
     }
@@ -15,8 +17,8 @@ class UserController {
     const id = req.params.id;
 
     try {
-      const users = await UserModel.findByPk(id);
-      res.status(200).json({ users });
+      const user = await UserModel.findByPk(id);
+      res.status(200).json({ user });
     } catch (error) {
       res.status(500).json({ message: 'Err!!' });
     }
@@ -24,7 +26,6 @@ class UserController {
 
   async create(req: Request, res: Response) {
     try {
-      console.log(req.body);
       let userNew = await UserModel.create({
         name: req.body.name,
         email: req.body.email,

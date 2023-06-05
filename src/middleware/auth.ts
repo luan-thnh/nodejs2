@@ -1,38 +1,37 @@
 import { Request, Response, NextFunction } from 'express';
 import UserModel from '../models/users_model';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    userId: string;
+  };
+}
 
 export async function authMiddleware(
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) {
-  const token: any = req.headers.authorization;
+  const Authorization = req.header('authorization');
+
+  if (!Authorization)
+    return res.status(401).json({ message: 'Unauthorized!!' });
+
+  const token = Authorization.replace('Bearer ', '');
 
   try {
     if (!token)
       return res.status(401).json({ message: 'Unauthorized: missing token' });
 
-    let verifyObj: any = await jwt.verify(token, 'auth1');
+    // Verify
+    const payload = (await jwt.verify(token, 'auth1')) as JwtPayload;
+    const { userId } = payload;
 
-    let user = await UserModel.findByPk(verifyObj.userId);
-
-    if (!user)
-      return res.status(401).json({ message: 'Unauthorized: user not found' });
-
-    if (user.token !== token)
-      return res.status(401).json({ message: 'Unauthorized: invalid token' });
-
+    // Assign req
+    req.user = { userId };
     next();
   } catch (error) {
-    if (error instanceof Error) {
-      return res
-        .status(401)
-        .json({ message: 'Unauthorized: ' + error.message });
-    } else {
-      return res
-        .status(401)
-        .json({ message: 'Unauthorized: ' + String(error) });
-    }
+    return res.status(401).json({ message: 'Unauthorized: ' + String(error) });
   }
 }

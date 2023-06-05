@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 
-const sequelize = new Sequelize('demo', 'root', '1000', {
+const sequelize = new Sequelize('usermanager', 'root', '1000', {
   host: 'localhost',
   dialect: 'mysql',
   pool: {
@@ -9,5 +9,14 @@ const sequelize = new Sequelize('demo', 'root', '1000', {
     idle: 10000,
   },
 });
+
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log('Connected database!');
+  })
+  .catch((error) => {
+    console.error('Not connect database!');
+  });
 
 export default sequelize;
